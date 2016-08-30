@@ -33,6 +33,7 @@ namespace AwsCloudWatch.Controllers
             ListBucketsResponse response = _amazonS3Client.ListBuckets();
             
             List<Region> amazonRegions = GetAmazonRegions(_amazonEc2Client);
+            List<AvailabilityZone> amazonAvaRegions = GetAmazonAvailabilityRegions(_amazonEc2Client);
             //int usersChoice = GetSelectedRegionOfUser(amazonRegions);
             Region selectedRegion = amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion));
             var imagesInRegion = GetSuitableImages(_amazonEc2Client, selectedRegion);
@@ -74,6 +75,22 @@ namespace AwsCloudWatch.Controllers
                 DescribeRegionsResponse describeRegionsResponse = amazonEc2Client.DescribeRegions(describeRegionsRequest);
                 List<Region> regions = describeRegionsResponse.Regions;
                 return regions;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private static List<AvailabilityZone> GetAmazonAvailabilityRegions(IAmazonEC2 amazonEc2Client)
+        {
+            try
+            {
+                DescribeAvailabilityZonesRequest descAvaRegionRequest = new DescribeAvailabilityZonesRequest();
+                DescribeAvailabilityZonesResponse descAvaRegionResponse = amazonEc2Client.DescribeAvailabilityZones(descAvaRegionRequest);
+                var response = descAvaRegionResponse.AvailabilityZones;
+
+                return response;
             }
             catch
             {
