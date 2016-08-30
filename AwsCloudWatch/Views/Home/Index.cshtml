@@ -1,0 +1,69 @@
+﻿@using AwsCloudWatch.Models
+@model VmView
+
+@{
+    
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+    <div id="divHeader">
+        Owner ID : @Model.Owner.OwnerId
+        <br/>
+        Owner Name : @Model.Owner.OwnerDisplayName
+    </div>
+
+    <div class="table-responsive">
+        <table id="tblListVm" class="table table-striped" style="width: auto">
+            <thead>
+            <tr>
+                <th>
+                    Instance Id
+                </th>
+                <th>
+                    AMI ID
+                </th>
+                <th>
+                    Instance Type
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Platform
+                </th>
+                <th>
+                    Monitoring
+                </th>
+                <th>
+                    Private DNS
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.ListInsMachines)
+            {
+                <tr>
+                    <td>@item.InstanceId</td>
+                    <td>@item.AmiId</td>
+                    <td>@item.InstanceType</td>
+                    <td style="color: green">@item.Status</td>
+                    <td>@item.Platform</td>
+                    <td>@item.Monitoring</td>
+                    <td>@item.PrivateDns</td>
+                    <td>
+                        @if (item.Status.Equals("running"))
+                        {
+                            <button id="btnStart" value="Start">Stop</button>
+                            <button id="btnReboot" value="Start">Reboot</button>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
