@@ -140,7 +140,7 @@ namespace AwsCloudWatch.Controllers
             {
                 DescribeImagesRequest imagesRequest = new DescribeImagesRequest()
                 {
-                    ImageIds = selectedRegion.RegionName.Equals(RegionEndpoint.APSoutheast1.SystemName) ? new List<string>() { "ami-21d30f42", "ami-d6f32ab5" } : new List<string>() { }
+                    ImageIds = selectedRegion.RegionName.Equals(RegionEndpoint.APSoutheast1.SystemName) ? new List<string>() { "ami-21d30f42", "ami-d6f32ab5" } : new List<string>() { "" }
                 };
                 DescribeImagesResponse imagesResponse = amazonEc2Client.DescribeImages(imagesRequest);
 
