@@ -1,4 +1,6 @@
-﻿@using AwsCloudWatch.Models
+﻿@using Amazon;
+@using Amazon.EC2.Model;
+@using AwsCloudWatch.Models
 @model VmView
 
 @{
@@ -8,62 +10,78 @@
 <h2>@ViewBag.Title</h2>
 
 
-    <div id="divHeader">
-        Owner ID : @Model.Owner.OwnerId
-        <br/>
-        Owner Name : @Model.Owner.OwnerDisplayName
-    </div>
+<div id="divHeader" style="margin-bottom: 30px;">
+    Owner Name : @Model.Owner.OwnerDisplayName
+</div>
+    
+<div id="divZone" style="width: auto;">
+    @{var listItems = new List<System.Web.UI.WebControls.ListItem>
+        {
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast1.DisplayName, Value = RegionEndpoint.APNortheast1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast1.DisplayName, Value = RegionEndpoint.APSoutheast1.SystemName, Selected = true },
+                //new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USWest1.DisplayName, Value = RegionEndpoint.USWest1.SystemName }
+        };
+    }
+    @Html.DropDownList("ddlZone", new SelectList(listItems, "Value", "Text", selectedValue: RegionEndpoint.APSoutheast1.SystemName), new { @onchange = "javascript: ZoneOnChange(); return false;", @style = "width: 200px;" })
+</div>    
 
-    <div class="table-responsive">
-        <table id="tblListVm" class="table table-striped" style="width: auto">
-            <thead>
+<div class="table-responsive">
+    <table id="tblListVm" class="table table-striped" style="width: auto">
+        <thead>
+        <tr>
+            <th>
+                Instance Id
+            </th>
+            <th>
+                AMI ID
+            </th>
+            <th>
+                Instance Type
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Platform
+            </th>
+            <th>
+                Monitoring
+            </th>
+            <th>
+                Private DNS
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.ListInsMachines)
+        {
             <tr>
-                <th>
-                    Instance Id
-                </th>
-                <th>
-                    AMI ID
-                </th>
-                <th>
-                    Instance Type
-                </th>
-                <th>
-                    Status
-                </th>
-                <th>
-                    Platform
-                </th>
-                <th>
-                    Monitoring
-                </th>
-                <th>
-                    Private DNS
-                </th>
-                <th>
-                    Action
-                </th>
+                <td>@item.InstanceId</td>
+                <td>@item.AmiId</td>
+                <td>@item.InstanceType</td>
+                <td style="color: green">@item.Status</td>
+                <td>@item.Platform</td>
+                <td>@item.Monitoring</td>
+                <td>@item.PrivateDns</td>
+                <td>
+                    @if (item.Status.Equals("running"))
+                    {
+                        <button id="btnStart" value="Start">Stop</button>
+                        <button id="btnReboot" value="Start">Reboot</button>
+                    }
+                </td>
             </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model.ListInsMachines)
-            {
-                <tr>
-                    <td>@item.InstanceId</td>
-                    <td>@item.AmiId</td>
-                    <td>@item.InstanceType</td>
-                    <td style="color: green">@item.Status</td>
-                    <td>@item.Platform</td>
-                    <td>@item.Monitoring</td>
-                    <td>@item.PrivateDns</td>
-                    <td>
-                        @if (item.Status.Equals("running"))
-                        {
-                            <button id="btnStart" value="Start">Stop</button>
-                            <button id="btnReboot" value="Start">Reboot</button>
-                        }
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+        }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    var param = document.getElementById('ddlZone').value;
+    function ZoneOnChange() {
+        window.location.href = '/?id=' + param;
+    }
+</script>

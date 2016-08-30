@@ -13,29 +13,43 @@ using Amazon;
 using Amazon.EC2.Model;
 using Amazon.S3;
 using Amazon.S3.Model;
+using System.Web.Configuration;
 
 namespace AwsCloudWatch.Controllers
 {
     public class HomeController : Controller
     {
-        private static readonly string AccessKeyId = ConfigurationManager.AppSettings["AmazonAccessKeyId"];
-        private static readonly string SecretAccessKey = ConfigurationManager.AppSettings["AmazonSecretAccessKey"];
-        private static readonly string AwsRegion = ConfigurationManager.AppSettings["AWSRegion"];
+        private static string AccessKeyId;
+        private static string SecretAccessKey;
+        private static string AwsRegion;
 
-        private readonly IAmazonEC2 _amazonEc2Client = new AmazonEC2Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey));
-        private readonly IAmazonS3 _amazonS3Client = new AmazonS3Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey));        
+        private IAmazonEC2 _amazonEc2Client;
+        private IAmazonS3 _amazonS3Client;   
 
         // GET: Home
-        public ActionResult Index()
+        public ActionResult Index(string id)
         {
             ViewBag.Title = "List Virtual Machines / Intances";
+            //Configuration config = WebConfigurationManager.OpenWebConfiguration("/");
+            //config.AppSettings.Settings["AWSRegion"].Value = RegionEndpoint.APSoutheast1.SystemName;
+            //config.Save(ConfigurationSaveMode.Modified);
+            //ConfigurationManager.RefreshSection("appSettings");
+
+            AccessKeyId = ConfigurationManager.AppSettings["AmazonAccessKeyId"];
+            SecretAccessKey = ConfigurationManager.AppSettings["AmazonSecretAccessKey"];
+            //AwsRegion = ConfigurationManager.AppSettings["AWSRegion"];
+            if (string.IsNullOrEmpty(id)) id = ConfigurationManager.AppSettings["AWSRegion"];
+            RegionEndpoint AwsRegion = RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1;
+
+            _amazonEc2Client = new AmazonEC2Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1);
+            _amazonS3Client = new AmazonS3Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1);
 
             ListBucketsResponse response = _amazonS3Client.ListBuckets();
             
             List<Region> amazonRegions = GetAmazonRegions(_amazonEc2Client);
             List<AvailabilityZone> amazonAvaRegions = GetAmazonAvailabilityRegions(_amazonEc2Client);
             //int usersChoice = GetSelectedRegionOfUser(amazonRegions);
-            Region selectedRegion = amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion));
+            Region selectedRegion = amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion.SystemName));
             var imagesInRegion = GetSuitableImages(_amazonEc2Client, selectedRegion);
             Image selectedImage = imagesInRegion.FirstOrDefault(c => c.ImageId.Equals("ami-21d30f42"));
             List<VirtualMachine> listInstances = LaunchImage(_amazonEc2Client, selectedImage, amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion)));
@@ -51,6 +65,9 @@ namespace AwsCloudWatch.Controllers
                 ListInsMachines = listInstances,
                 Owner = Owner
             };
+
+            // Dispose interface objects
+            Dispose(_amazonEc2Client, _amazonS3Client);
 
             return View(Vm);
         }
@@ -123,7 +140,7 @@ namespace AwsCloudWatch.Controllers
             {
                 DescribeImagesRequest imagesRequest = new DescribeImagesRequest()
                 {
-                    ImageIds = new List<string>() { "ami-21d30f42", "ami-d6f32ab5" }
+                    ImageIds = selectedRegion.RegionName.Equals(RegionEndpoint.APSoutheast1.SystemName) ? new List<string>() { "ami-21d30f42", "ami-d6f32ab5" } : new List<string>() { }
                 };
                 DescribeImagesResponse imagesResponse = amazonEc2Client.DescribeImages(imagesRequest);
 
@@ -131,7 +148,8 @@ namespace AwsCloudWatch.Controllers
             }
             catch
             {
-                throw;
+                return new List<Amazon.EC2.Model.Image>();
+                //throw;
             }
         }
 
@@ -159,7 +177,8 @@ namespace AwsCloudWatch.Controllers
             }
             catch
             {
-                throw;
+                return new List<Amazon.EC2.Model.Image>();
+                //throw;
             }
         }
 
@@ -188,7 +207,18 @@ namespace AwsCloudWatch.Controllers
             }
             catch
             {
-                throw;
+                return new List<VirtualMachine> ();
+                //throw;
+            }
+        }
+
+        protected void Dispose(IAmazonEC2 ec2, IAmazonS3 s3)
+        {
+            if (ec2 != null && s3 != null)
+            {
+                ((IDisposable)ec2).Dispose();
+                ((IDisposable)s3).Dispose();
+
             }
         }
     }
