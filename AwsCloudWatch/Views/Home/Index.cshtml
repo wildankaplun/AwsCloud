@@ -15,14 +15,17 @@
 </div>
     
 <div id="divZone" style="width: auto;">
-    @{var listItems = new List<System.Web.UI.WebControls.ListItem>
+    @{
+
+        var listItems = new List<System.Web.UI.WebControls.ListItem>
         {
-                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast1.DisplayName, Value = RegionEndpoint.APNortheast1.SystemName },
-                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast1.DisplayName, Value = RegionEndpoint.APSoutheast1.SystemName, Selected = true },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast1.DisplayName, Value = RegionEndpoint.APSoutheast1.SystemName },            
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast1.DisplayName, Value = RegionEndpoint.APNortheast1.SystemName }
                 //new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USWest1.DisplayName, Value = RegionEndpoint.USWest1.SystemName }
         };
     }
-    @Html.DropDownList("ddlZone", new SelectList(listItems, "Value", "Text", selectedValue: RegionEndpoint.APSoutheast1.SystemName), new { @onchange = "javascript: ZoneOnChange(); return false;", @style = "width: 200px;" })
+    @Html.DropDownList("ddlZone", new SelectList(listItems, "Value", "Text", selectedValue: Request.QueryString["id"] == null ? RegionEndpoint.APSoutheast1.SystemName : (Request.QueryString["id"] != null ? Request.QueryString["id"] as string : RegionEndpoint.APNortheast1.SystemName))
+                        , new { @onchange = "javascript: ZoneOnChange(); return false;", @style = "width: 200px;" })
 </div>    
 
 <div class="table-responsive">
@@ -80,8 +83,8 @@
 </div>
 
 <script>
-    var param = document.getElementById('ddlZone').value;
     function ZoneOnChange() {
+        var param = document.getElementById('ddlZone').value;
         window.location.href = '/?id=' + param;
     }
 </script>
