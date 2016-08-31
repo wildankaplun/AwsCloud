@@ -41,8 +41,8 @@ namespace AwsCloudWatch.Controllers
             if (string.IsNullOrEmpty(id)) id = ConfigurationManager.AppSettings["AWSRegion"];
             RegionEndpoint AwsRegion = RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1;
 
-            _amazonEc2Client = new AmazonEC2Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1);
-            _amazonS3Client = new AmazonS3Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1);
+            _amazonEc2Client = new AmazonEC2Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1.SystemName.Equals(id) ? RegionEndpoint.APNortheast1 : RegionEndpoint.APNortheast2);
+            _amazonS3Client = new AmazonS3Client(GetAmazonCredentials(AccessKeyId, SecretAccessKey), RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? RegionEndpoint.APSoutheast1 : RegionEndpoint.APNortheast1.SystemName.Equals(id) ? RegionEndpoint.APNortheast1 : RegionEndpoint.APNortheast2);
 
             ListBucketsResponse response = _amazonS3Client.ListBuckets();
             
@@ -51,7 +51,7 @@ namespace AwsCloudWatch.Controllers
             //int usersChoice = GetSelectedRegionOfUser(amazonRegions);
             Region selectedRegion = amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion.SystemName));
             var imagesInRegion = GetSuitableImages(_amazonEc2Client, selectedRegion);
-            Image selectedImage = imagesInRegion.FirstOrDefault(c => RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? c.ImageId.Contains("ami-21d30f42") : c.ImageId.Contains("ami-a21529cc"));
+            Image selectedImage = imagesInRegion.FirstOrDefault(c => RegionEndpoint.APSoutheast1.SystemName.Equals(id) ? c.ImageId.Contains("ami-21d30f42") : c.ImageId.Equals("ami-a21529cc"));
             List<VirtualMachine> listInstances = LaunchImage(_amazonEc2Client, selectedImage, amazonRegions.FirstOrDefault(c => c.RegionName.Equals(AwsRegion.SystemName)));
 
             var Owner = new OwnerInstance()
@@ -140,7 +140,7 @@ namespace AwsCloudWatch.Controllers
             {
                 DescribeImagesRequest imagesRequest = new DescribeImagesRequest()
                 {
-                    ImageIds = selectedRegion.RegionName.Equals(RegionEndpoint.APSoutheast1.SystemName) ? new List<string>() { "ami-21d30f42", "ami-d6f32ab5" } : new List<string>() { "ami-a21529cc" }
+                    ImageIds = selectedRegion.RegionName.Equals(RegionEndpoint.APSoutheast1.SystemName) ? new List<string>() { "ami-21d30f42", "ami-d6f32ab5" } : selectedRegion.RegionName.Equals(RegionEndpoint.APNortheast1.SystemName) ? new List<string>() { "ami-a21529cc" } : new List<string>() { }
                 };
                 DescribeImagesResponse imagesResponse = amazonEc2Client.DescribeImages(imagesRequest);
 
