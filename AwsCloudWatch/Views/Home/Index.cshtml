@@ -19,9 +19,17 @@
 
         var listItems = new List<System.Web.UI.WebControls.ListItem>
         {
-                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast1.DisplayName, Value = RegionEndpoint.APSoutheast1.SystemName },            
-                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast1.DisplayName, Value = RegionEndpoint.APNortheast1.SystemName }
-                //new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USWest1.DisplayName, Value = RegionEndpoint.USWest1.SystemName }
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USEast1.DisplayName, Value = RegionEndpoint.USEast1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USWest1.DisplayName, Value = RegionEndpoint.USWest1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.USWest2.DisplayName, Value = RegionEndpoint.USWest2.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.EUWest1.DisplayName, Value = RegionEndpoint.EUWest1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.EUCentral1.DisplayName, Value = RegionEndpoint.EUCentral1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast1.DisplayName, Value = RegionEndpoint.APSoutheast1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast2.DisplayName, Value = RegionEndpoint.APNortheast2.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APNortheast1.DisplayName, Value = RegionEndpoint.APNortheast1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.APSoutheast2.DisplayName, Value = RegionEndpoint.APSoutheast2.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.SAEast1.DisplayName, Value = RegionEndpoint.SAEast1.SystemName },
+                new System.Web.UI.WebControls.ListItem { Text = RegionEndpoint.CNNorth1.DisplayName, Value = RegionEndpoint.CNNorth1.SystemName },
         };
     }
     @Html.DropDownList("ddlZone", new SelectList(listItems, "Value", "Text", selectedValue: Request.QueryString["id"] == null ? RegionEndpoint.APSoutheast1.SystemName : (Request.QueryString["id"] != null ? Request.QueryString["id"] as string : RegionEndpoint.APNortheast1.SystemName))
@@ -85,6 +93,6 @@
 <script>
     function ZoneOnChange() {
         var param = document.getElementById('ddlZone').value;
-        window.location.href = '/?id=' + param;
+        window.location.href = '/amazon/?id=' + param;
     }
 </script>
